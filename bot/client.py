@@ -31,6 +31,9 @@ class TinkoffClient:
     async def ainit(self):
         self.client = await AsyncClient(token=self.token, app_name="invest_bot").__aenter__()
 
+    async def open_sandbox_account(self):
+        return await self.client.sandbox.open_sandbox_account()
+
     async def get_orders(self, **kwargs):
         if self.sandbox:
             return await self.client.sandbox.get_sandbox_orders(**kwargs)

@@ -3,7 +3,6 @@ import logging
 
 from bot.settings import settings
 from bot.client import client
-from bot.strategy import 
 
 
 logging.basicConfig(
@@ -13,24 +12,28 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-async def choose_account():
-    await response = client.get_accounts()
-    if (response.accounts).accounts:
+async def get_account_id() -> str:
+    """ Chooses random avaible account or
+    generates a new one if there is none avaible 
+    :returns: String - account id
+    """
+    logger.info(f"Fetching accounts...")
+    response = await client.get_accounts()
+    if response.accounts:
         logger.info("Accounts found")
     else:
         logger.warning("No accounts found. Creating a new account")
-        client.sandbox.open_sandbox_account()
-        await response = client.get_accounts()
-
-        
+        await client.open_sandbox_account()
+        response = await client.get_accounts()
+    return response.accounts[0].id    
 
 async def main():
     logger.info("Initializing client...")
     await client.ainit()
     logger.info("Client initialized")
-    await choose_account()
-
-
+    account_id = await get_account_id()
+    logger.info(f"Using account {account_id}")
+    logger.info("Process finished")
 
 if __name__ == "__main__":
     asyncio.run(main())
