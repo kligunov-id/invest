@@ -12,20 +12,18 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+async def is_available_account() -> bool:
+    logger.info(f"Checking for available accounts...")
+    return bool(await client.get_accounts())
+
 async def get_account_id() -> str:
-    """ Chooses random avaible account or
-    generates a new one if there is none avaible 
-    :returns: String - account id
-    """
-    logger.info(f"Fetching accounts...")
-    response = await client.get_accounts()
-    if response.accounts:
+    if await is_available_account():
         logger.info("Accounts found")
     else:
-        logger.warning("No accounts found. Creating a new account")
+        logger.warning("No accounts found. Creating a new account...")
         await client.open_sandbox_account()
-        response = await client.get_accounts()
-    return response.accounts[0].id    
+    accounts = await client.get_accounts()
+    return accounts[0].id    
 
 async def main():
     logger.info("Initializing client...")

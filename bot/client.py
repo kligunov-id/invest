@@ -46,8 +46,8 @@ class TinkoffClient:
 
     async def get_accounts(self):
         if self.sandbox:
-            return await self.client.sandbox.get_sandbox_accounts()
-        return await self.client.users.get_accounts()
+            return (await self.client.sandbox.get_sandbox_accounts()).accounts
+        return (await self.client.users.get_accounts()).accounts
 
     async def get_all_candles(self, **kwargs):
         async for candle in self.client.get_all_candles(**kwargs):
