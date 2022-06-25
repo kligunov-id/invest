@@ -15,21 +15,28 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def is_available_account() -> bool:
-    logger.info(f"Checking for available accounts...")
+    logger.debug(f"Checking for available accounts...")
     return bool(await client.get_accounts())
 
-async def get_account_id() -> str:
+async def set_account_id():
     if await is_available_account():
-        logger.info("Accounts found")
+        logger.debug("Accounts found")
     else:
         logger.warning("No accounts found. Creating a new account...")
         await client.open_sandbox_account()
     accounts = await client.get_accounts()
-    return accounts[0].id    
+    settings.account_id = accounts[0].id    
 
-def create_tasks_for_strategies(account_id) -> list[asyncio.Task]:
+async def init_account():
+    if settings.account_id is None:
+        await set_account_id()
+    else:
+        logger.debug("Account is provided in .env")
+    logger.info(f"Using account {settings.account_id}")
+
+def create_tasks_for_strategies() -> list[asyncio.Task]:
     strategies = [construct_strategy(strategy_name=settings.strategy_name,
-                                        account_id=account_id,
+                                        account_id=settings.account_id,
                                         figi=settings.figi)]
     return [asyncio.create_task(strategy.run()) for strategy in strategies]
 
@@ -37,10 +44,9 @@ async def main():
     logger.info("Initializing client...")
     await client.ainit()
     logger.info("Client initialized")
-    account_id = await get_account_id()
-    logger.info(f"Using account {account_id}")
+    await init_account()
     logger.info("Starting strategies...")
-    tasks = create_tasks_for_strategies(account_id)
+    tasks = create_tasks_for_strategies()
     logger.info("All strategies are up and running")
     logger.info("Waiting while the strategies are running...")
     for task in tasks:

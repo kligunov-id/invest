@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     sandbox: bool = True
     figi: str
     strategy_name: StrategyName
+    account_id: Optional[str] = None
     
     class Config:
         env_file = ".env"
