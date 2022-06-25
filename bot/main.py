@@ -53,4 +53,8 @@ async def main():
         await task
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt, shutting down...")
+        exit(0)
