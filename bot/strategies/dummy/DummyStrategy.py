@@ -14,8 +14,11 @@ class DummyStrategy(BaseStrategy):
         self.config = DummyStrategyConfig(**kwargs)
 
     async def wait_until_market_open(self):
-        self.logger.info("Pretending to be waiting for the market to open...")
-        await asyncio.sleep(self.config.duration_of_dummy_operations_in_seconds)
+        if self.config.should_wait_until_market_open:
+            await super().wait_until_market_open()
+        else:
+            self.logger.info("Pretending to be waiting for the market to open...")
+            await asyncio.sleep(self.config.duration_of_dummy_operations_in_seconds)
 
     async def update_model(self):
         self.logger.info("Pretending to be updating model...")
