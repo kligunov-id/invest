@@ -43,4 +43,4 @@ class BaseStrategy(ABC):
             await self.wait_until_orders_executed()
             await self.update_model()
             await self.post_orders()
-            await asyncio.sleep(1)
+            await asyncio.sleep(10)

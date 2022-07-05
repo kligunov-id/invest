@@ -162,8 +162,8 @@ class ClientAdapter:
 
     async def post_order_buy_all(self, account_id: str, figi: str) -> None:
         """ Warning: when price spikes this method can force to buy more than actually can """
-        shares_max = self.get_money_balance(account_id) / self.get_last_price(figi)
-        lot_max = int(shares_max / self.get_lot_size(figi))
+        shares_max = await self.get_money_balance(account_id) / await self.get_last_price(figi)
+        lot_max = int(shares_max / await self.get_lot_size(figi))
         await self.post_order_buy(account_id, figi, lot_max)
 
     async def get_last_price(self, figi: str) -> float:

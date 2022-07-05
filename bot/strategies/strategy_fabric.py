@@ -1,12 +1,14 @@
 from typing import Dict
 
 from bot.strategies.dummy.DummyStrategy import DummyStrategy
+from bot.strategies.rsi.RSI_Strategy import RSI_Strategy
 from bot.strategies.base import BaseStrategy
 from bot.strategies.errors import UnsupportedStrategyError
 from bot.strategies.models import StrategyName
 
 strategies: Dict[StrategyName, BaseStrategy.__class__] = {
     StrategyName.DUMMY: DummyStrategy,
+    StrategyName.RSI: RSI_Strategy,
 }
 
 
