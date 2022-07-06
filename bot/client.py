@@ -97,6 +97,9 @@ class ServiceAutoSelectorClient:
 
     async def open_sandbox_account(self) -> None:
         await self.client.sandbox.open_sandbox_account()
+    
+    async def get_instrument_by(self, **kwargs):
+        return await self.client.instruments.get_instrument_by(**kwargs)
 
 class ClientAdapter:
     """ Wrapper for ServiceAutoSelectorClient implementing higher-level functionality """
@@ -158,7 +161,7 @@ class ClientAdapter:
 
     async def post_order_sell_all(self, account_id: str, figi: str) -> None:
         quantity_lots = await self.get_postition_quantity_lots(account_id, figi)
-        await self.post_order_buy(account_id, figi, quantity_lots)
+        await self.post_order_sell(account_id, figi, quantity_lots)
 
     async def post_order_buy_all(self, account_id: str, figi: str) -> None:
         """ Warning: when price spikes this method can force to buy more than actually can """
@@ -170,7 +173,7 @@ class ClientAdapter:
         # API method expects figi to be array of figi-s
         # We wrap figi in an array here because
         # otherwise will be treated as an array of one-letter figi-s
-        last_price_entry =  await self.client.get_last_prices(figi=[figi]).last_prices[0]
+        last_price_entry =  (await self.client.get_last_prices(figi=[figi])).last_prices[0]
         return quotation_to_float(last_price_entry.price)
     
     async def get_candles(
@@ -203,7 +206,7 @@ class ClientAdapter:
         return [quotation_to_float(candle.open) for candle in candles]
 
     async def get_money_balance(self, account_id: str, currency: str="rub") -> float:
-        money_positions =  client.get_positions(account_id=account_id).money
+        money_positions = (await self.client.get_positions(account_id=account_id)).money
         for money_value in money_positions:
             if money_value.currency == currency:
                 return money_value_to_float(money_value)
@@ -223,13 +226,13 @@ class ClientAdapter:
         instruments = (await self.client.get_positions(account_id=account_id)).securities
         for position in instruments:
             if position.figi == figi:
-                return position.balance / await self.get_lot_size(figi=figi)
+                return int(position.balance / await self.get_lot_size(figi=figi))
         return 0
 
 
     async def get_lot_size(self, figi: str) -> int:
-        response = await self.client.instruments.get_instrument_by(
-            figi=figi, id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI
+        response = await self.client.get_instrument_by(
+            id=figi, id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI
             )
         return response.instrument.lot
 
